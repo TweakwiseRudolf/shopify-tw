@@ -1,0 +1,472 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tweakwise>
+<categories>
+    <category>
+      <categoryid>1</categoryid>
+      <name><![CDATA[root]]></name>
+      <rank>0</rank>
+    </category>
+    <category>
+      <categoryid><![CDATA[643344302413]]></categoryid>
+      <name><![CDATA[Home page]]></name>
+      <url><![CDATA[/collections/frontpage]]></url>
+      <rank>1</rank>
+      <parents>
+        <categoryid>1</categoryid>
+      </parents>
+    </category>
+    <category>
+      <categoryid><![CDATA[643344335181]]></categoryid>
+      <name><![CDATA[Automated Collection]]></name>
+      <url><![CDATA[/collections/automated-collection]]></url>
+      <rank>2</rank>
+      <parents>
+        <categoryid>1</categoryid>
+      </parents>
+    </category>
+    <category>
+      <categoryid><![CDATA[643344367949]]></categoryid>
+      <name><![CDATA[Hydrogen]]></name>
+      <url><![CDATA[/collections/hydrogen]]></url>
+      <rank>3</rank>
+      <parents>
+        <categoryid>1</categoryid>
+      </parents>
+    </category>
+</categories>
+<products>
+    <product>
+      <productid><![CDATA[10173505700173]]></productid>
+      <name><![CDATA[Clay Plant Pot]]></name>
+      <url><![CDATA[/products/clay-plant-pot]]></url>
+      <image><![CDATA[https://cdn.shopify.com/s/files/1/0906/8583/3549/files/single-sprout-in-a-pot_925x_20dfad3f-366d-4028-a305-dea2b12311f5.jpg?v=1752561746]]></image>
+      <brand><![CDATA[Company 123]]></brand>
+      <stock>0</stock>
+      <price>9.99</price>
+      <categories>
+        <categoryid>643344302413</categoryid>
+      </categories>
+    </product>
+    <product>
+      <productid><![CDATA[10173505732941]]></productid>
+      <name><![CDATA[Copper Light]]></name>
+      <url><![CDATA[/products/copper-light]]></url>
+      <image><![CDATA[https://cdn.shopify.com/s/files/1/0906/8583/3549/files/copper-light-in-bedroom_925x_1d317269-b6f1-4526-9ae7-1d6bf1ed323e.jpg?v=1752561748]]></image>
+      <brand><![CDATA[Company 123]]></brand>
+      <stock>0</stock>
+      <price>59.99</price>
+      <categories>
+      </categories>
+    </product>
+    <product>
+      <productid><![CDATA[10173505798477]]></productid>
+      <name><![CDATA[Cream Sofa]]></name>
+      <url><![CDATA[/products/cream-sofa]]></url>
+      <image><![CDATA[https://cdn.shopify.com/s/files/1/0906/8583/3549/files/condominium-interior-livingroom_925x_8e74f3c4-ee26-40e2-a43f-38d4e6052680.jpg?v=1752561750]]></image>
+      <brand><![CDATA[Company 123]]></brand>
+      <stock>0</stock>
+      <price>500.00</price>
+      <categories>
+        <categoryid>643344335181</categoryid>
+      </categories>
+    </product>
+    <product>
+      <productid><![CDATA[10173505831245]]></productid>
+      <name><![CDATA[Antique Drawers]]></name>
+      <url><![CDATA[/products/antique-drawers]]></url>
+      <image><![CDATA[https://cdn.shopify.com/s/files/1/0906/8583/3549/files/babys-room_925x_a45fc9a3-0fb0-41ab-93d2-790a8a190af8.jpg?v=1752561753]]></image>
+      <brand><![CDATA[Company 123]]></brand>
+      <stock>0</stock>
+      <price>250.00</price>
+      <categories>
+        <categoryid>643344335181</categoryid>
+      </categories>
+    </product>
+    <product>
+      <productid><![CDATA[10173505962317]]></productid>
+      <name><![CDATA[White Bed Clothes]]></name>
+      <url><![CDATA[/products/white-bed-clothes]]></url>
+      <image><![CDATA[https://cdn.shopify.com/s/files/1/0906/8583/3549/files/bright-hotel-room-bed_925x_716275c8-9c7c-4e5f-b4d2-dd57ed213775.jpg?v=1752561755]]></image>
+      <brand><![CDATA[Company 123]]></brand>
+      <stock>0</stock>
+      <price>29.99</price>
+      <categories>
+      </categories>
+    </product>
+    <product>
+      <productid><![CDATA[10173506060621]]></productid>
+      <name><![CDATA[Pink Armchair]]></name>
+      <url><![CDATA[/products/pink-armchair]]></url>
+      <image><![CDATA[https://cdn.shopify.com/s/files/1/0906/8583/3549/files/soft-pink-cushioned-armchair-in-stately-salon_925x_0faeb4f8-4795-4c28-94d8-76d20b155299.jpg?v=1752561757]]></image>
+      <brand><![CDATA[Company 123]]></brand>
+      <stock>0</stock>
+      <price>750.00</price>
+      <categories>
+        <categoryid>643344335181</categoryid>
+      </categories>
+    </product>
+    <product>
+      <productid><![CDATA[10173506191693]]></productid>
+      <name><![CDATA[Wooden Outdoor Table]]></name>
+      <url><![CDATA[/products/wooden-outdoor-table]]></url>
+      <image><![CDATA[https://cdn.shopify.com/s/files/1/0906/8583/3549/files/cafe-patio_925x_4bd6d211-b875-43f8-a427-9a6a61ff14f8.jpg?v=1752561760]]></image>
+      <brand><![CDATA[Rustic LTD]]></brand>
+      <stock>0</stock>
+      <price>99.99</price>
+      <categories>
+      </categories>
+    </product>
+    <product>
+      <productid><![CDATA[10173506388301]]></productid>
+      <name><![CDATA[Brown Throw Pillows]]></name>
+      <url><![CDATA[/products/brown-throw-pillows]]></url>
+      <image><![CDATA[https://cdn.shopify.com/s/files/1/0906/8583/3549/files/bedroom-bed-with-brown-throw-pillows_925x_4b658d3d-ad61-4f3d-92ed-9852ea60ca5b.jpg?v=1752561762]]></image>
+      <brand><![CDATA[Rustic LTD]]></brand>
+      <stock>0</stock>
+      <price>19.99</price>
+      <categories>
+      </categories>
+    </product>
+    <product>
+      <productid><![CDATA[10173506486605]]></productid>
+      <name><![CDATA[White Ceramic Pot]]></name>
+      <url><![CDATA[/products/white-ceramic-pot]]></url>
+      <image><![CDATA[https://cdn.shopify.com/s/files/1/0906/8583/3549/files/house-plant-in-white-pot_925x_44b80d2b-add6-407e-a6da-180448befca7.jpg?v=1752561764]]></image>
+      <brand><![CDATA[Rustic LTD]]></brand>
+      <stock>0</stock>
+      <price>15.99</price>
+      <categories>
+      </categories>
+    </product>
+    <product>
+      <productid><![CDATA[10173506584909]]></productid>
+      <name><![CDATA[Yellow watering can]]></name>
+      <url><![CDATA[/products/yellow-watering-can]]></url>
+      <image><![CDATA[https://cdn.shopify.com/s/files/1/0906/8583/3549/files/flowers-in-yellow-watering-can_925x_c3fab809-6732-4f8b-9b75-c4aaca508ea8.jpg?v=1752561766]]></image>
+      <brand><![CDATA[Rustic LTD]]></brand>
+      <stock>0</stock>
+      <price>40.99</price>
+      <categories>
+      </categories>
+    </product>
+    <product>
+      <productid><![CDATA[10173506650445]]></productid>
+      <name><![CDATA[Gardening hand trowel]]></name>
+      <url><![CDATA[/products/gardening-hand-trowel]]></url>
+      <image><![CDATA[https://cdn.shopify.com/s/files/1/0906/8583/3549/files/spring-gardening-set-up_925x_ffeb851f-96c5-41e9-b525-09d7e130ab82.jpg?v=1752561768]]></image>
+      <brand><![CDATA[Rustic LTD]]></brand>
+      <stock>0</stock>
+      <price>10.99</price>
+      <categories>
+      </categories>
+    </product>
+    <product>
+      <productid><![CDATA[10173506814285]]></productid>
+      <name><![CDATA[Biodegradable cardboard pots]]></name>
+      <url><![CDATA[/products/biodegradable-cardboard-pots]]></url>
+      <image><![CDATA[https://cdn.shopify.com/s/files/1/0906/8583/3549/files/potted-seeds_925x_b3ef5cf3-3610-4998-8826-b58131918241.jpg?v=1752561770]]></image>
+      <brand><![CDATA[Rustic LTD]]></brand>
+      <stock>8</stock>
+      <price>10.00</price>
+      <categories>
+      </categories>
+    </product>
+    <product>
+      <productid><![CDATA[10173506912589]]></productid>
+      <name><![CDATA[Grey Sofa]]></name>
+      <url><![CDATA[/products/grey-sofa]]></url>
+      <image><![CDATA[https://cdn.shopify.com/s/files/1/0906/8583/3549/files/large-grey-sofa-by-brick-wall_925x_4d5d5292-5083-485d-9301-ac62db55911f.jpg?v=1752561773]]></image>
+      <brand><![CDATA[Rustic LTD]]></brand>
+      <stock>0</stock>
+      <price>29.99</price>
+      <categories>
+      </categories>
+    </product>
+    <product>
+      <productid><![CDATA[10173507010893]]></productid>
+      <name><![CDATA[The Inventory Not Tracked Snowboard]]></name>
+      <url><![CDATA[/products/the-inventory-not-tracked-snowboard]]></url>
+      <image><![CDATA[https://cdn.shopify.com/s/files/1/0906/8583/3549/files/snowboard_purple_hydrogen.png?v=1752561777]]></image>
+      <brand><![CDATA[TweakwiseExport]]></brand>
+      <stock>0</stock>
+      <price>949.95</price>
+      <categories>
+      </categories>
+    </product>
+    <product>
+      <productid><![CDATA[10173507043661]]></productid>
+      <name><![CDATA[Gift Card]]></name>
+      <url><![CDATA[/products/gift-card]]></url>
+      <image><![CDATA[https://cdn.shopify.com/s/files/1/0906/8583/3549/files/gift_card.png?v=1752561777]]></image>
+      <brand><![CDATA[Snowboard Vendor]]></brand>
+      <stock>0</stock>
+      <price>10.00</price>
+      <categories>
+      </categories>
+    </product>
+    <product>
+      <productid><![CDATA[10173507076429]]></productid>
+      <name><![CDATA[The Minimal Snowboard]]></name>
+      <url><![CDATA[/products/the-minimal-snowboard]]></url>
+      <image><![CDATA[]]></image>
+      <brand><![CDATA[TweakwiseExport]]></brand>
+      <stock>50</stock>
+      <price>885.95</price>
+      <categories>
+      </categories>
+    </product>
+    <product>
+      <productid><![CDATA[10173507109197]]></productid>
+      <name><![CDATA[The Compare at Price Snowboard]]></name>
+      <url><![CDATA[/products/the-compare-at-price-snowboard]]></url>
+      <image><![CDATA[https://cdn.shopify.com/s/files/1/0906/8583/3549/files/snowboard_sky.png?v=1752561777]]></image>
+      <brand><![CDATA[TweakwiseExport]]></brand>
+      <stock>10</stock>
+      <price>785.95</price>
+      <categories>
+        <categoryid>643344335181</categoryid>
+      </categories>
+    </product>
+    <product>
+      <productid><![CDATA[10173507141965]]></productid>
+      <name><![CDATA[The Hidden Snowboard]]></name>
+      <url><![CDATA[/products/the-hidden-snowboard]]></url>
+      <image><![CDATA[https://cdn.shopify.com/s/files/1/0906/8583/3549/files/Main_c8ff0b5d-c712-429a-be00-b29bd55cbc9d.jpg?v=1752561777]]></image>
+      <brand><![CDATA[Snowboard Vendor]]></brand>
+      <stock>50</stock>
+      <price>749.95</price>
+      <categories>
+        <categoryid>643344335181</categoryid>
+      </categories>
+    </product>
+    <product>
+      <productid><![CDATA[10173507174733]]></productid>
+      <name><![CDATA[The Draft Snowboard]]></name>
+      <url><![CDATA[/products/the-draft-snowboard]]></url>
+      <image><![CDATA[https://cdn.shopify.com/s/files/1/0906/8583/3549/files/Main_5127218a-8f6c-498f-b489-09242c0fab0a.jpg?v=1752561777]]></image>
+      <brand><![CDATA[Snowboard Vendor]]></brand>
+      <stock>20</stock>
+      <price>2629.95</price>
+      <categories>
+      </categories>
+    </product>
+    <product>
+      <productid><![CDATA[10173507207501]]></productid>
+      <name><![CDATA[The Videographer Snowboard]]></name>
+      <url><![CDATA[/products/the-videographer-snowboard]]></url>
+      <image><![CDATA[https://cdn.shopify.com/s/files/1/0906/8583/3549/files/Main.jpg?v=1752561777]]></image>
+      <brand><![CDATA[TweakwiseExport]]></brand>
+      <stock>50</stock>
+      <price>885.95</price>
+      <categories>
+      </categories>
+    </product>
+    <product>
+      <productid><![CDATA[10173507240269]]></productid>
+      <name><![CDATA[The Archived Snowboard]]></name>
+      <url><![CDATA[/products/the-archived-snowboard]]></url>
+      <image><![CDATA[https://cdn.shopify.com/s/files/1/0906/8583/3549/files/Main_52f8e304-92d9-4a36-82af-50df8fe31c69.jpg?v=1752561777]]></image>
+      <brand><![CDATA[Snowboard Vendor]]></brand>
+      <stock>50</stock>
+      <price>629.95</price>
+      <categories>
+        <categoryid>643344335181</categoryid>
+      </categories>
+    </product>
+    <product>
+      <productid><![CDATA[10173507273037]]></productid>
+      <name><![CDATA[Selling Plans Ski Wax]]></name>
+      <url><![CDATA[/products/selling-plans-ski-wax]]></url>
+      <image><![CDATA[https://cdn.shopify.com/s/files/1/0906/8583/3549/files/snowboard_wax.png?v=1752561777]]></image>
+      <brand><![CDATA[TweakwiseExport]]></brand>
+      <stock>30</stock>
+      <price>24.95</price>
+      <categories>
+      </categories>
+    </product>
+    <product>
+      <productid><![CDATA[10173507305805]]></productid>
+      <name><![CDATA[The Complete Snowboard]]></name>
+      <url><![CDATA[/products/the-complete-snowboard]]></url>
+      <image><![CDATA[https://cdn.shopify.com/s/files/1/0906/8583/3549/files/Main_589fc064-24a2-4236-9eaf-13b2bd35d21d.jpg?v=1752561777]]></image>
+      <brand><![CDATA[Snowboard Vendor]]></brand>
+      <stock>50</stock>
+      <price>699.95</price>
+      <categories>
+        <categoryid>643344335181</categoryid>
+      </categories>
+    </product>
+    <product>
+      <productid><![CDATA[10173507338573]]></productid>
+      <name><![CDATA[The Out of Stock Snowboard]]></name>
+      <url><![CDATA[/products/the-out-of-stock-snowboard]]></url>
+      <image><![CDATA[https://cdn.shopify.com/s/files/1/0906/8583/3549/files/Main_f44a9605-cd62-464d-b095-d45cdaa0d0d7.jpg?v=1752561777]]></image>
+      <brand><![CDATA[TweakwiseExport]]></brand>
+      <stock>0</stock>
+      <price>885.95</price>
+      <categories>
+      </categories>
+    </product>
+    <product>
+      <productid><![CDATA[10173507371341]]></productid>
+      <name><![CDATA[The Collection Snowboard: Hydrogen]]></name>
+      <url><![CDATA[/products/the-collection-snowboard-hydrogen]]></url>
+      <image><![CDATA[https://cdn.shopify.com/s/files/1/0906/8583/3549/files/Main_0a40b01b-5021-48c1-80d1-aa8ab4876d3d.jpg?v=1752561777]]></image>
+      <brand><![CDATA[Hydrogen Vendor]]></brand>
+      <stock>50</stock>
+      <price>600.00</price>
+      <categories>
+        <categoryid>643344335181</categoryid>
+        <categoryid>643344367949</categoryid>
+      </categories>
+    </product>
+    <product>
+      <productid><![CDATA[10173507436877]]></productid>
+      <name><![CDATA[Wooden outdoor slats]]></name>
+      <url><![CDATA[/products/wooden-outdoor-slats]]></url>
+      <image><![CDATA[https://cdn.shopify.com/s/files/1/0906/8583/3549/files/house-plant-on-wooden-slat-wall_925x_0ecb907f-69d9-4200-89b3-38e4ce5c25db.jpg?v=1752561775]]></image>
+      <brand><![CDATA[Rustic LTD]]></brand>
+      <stock>0</stock>
+      <price>25.99</price>
+      <categories>
+      </categories>
+    </product>
+    <product>
+      <productid><![CDATA[10173507469645]]></productid>
+      <name><![CDATA[The Collection Snowboard: Oxygen]]></name>
+      <url><![CDATA[/products/the-collection-snowboard-oxygen]]></url>
+      <image><![CDATA[https://cdn.shopify.com/s/files/1/0906/8583/3549/files/Main_d624f226-0a89-4fe1-b333-0d1548b43c06.jpg?v=1752561777]]></image>
+      <brand><![CDATA[Hydrogen Vendor]]></brand>
+      <stock>50</stock>
+      <price>1025.00</price>
+      <categories>
+        <categoryid>643344367949</categoryid>
+      </categories>
+    </product>
+    <product>
+      <productid><![CDATA[10173507502413]]></productid>
+      <name><![CDATA[The Multi-location Snowboard]]></name>
+      <url><![CDATA[/products/the-multi-location-snowboard]]></url>
+      <image><![CDATA[https://cdn.shopify.com/s/files/1/0906/8583/3549/files/Main_0a4e9096-021a-4c1e-8750-24b233166a12.jpg?v=1752561778]]></image>
+      <brand><![CDATA[TweakwiseExport]]></brand>
+      <stock>100</stock>
+      <price>729.95</price>
+      <categories>
+        <categoryid>643344335181</categoryid>
+      </categories>
+    </product>
+    <product>
+      <productid><![CDATA[10173507535181]]></productid>
+      <name><![CDATA[The Collection Snowboard: Liquid]]></name>
+      <url><![CDATA[/products/the-collection-snowboard-liquid]]></url>
+      <image><![CDATA[https://cdn.shopify.com/s/files/1/0906/8583/3549/files/Main_b13ad453-477c-4ed1-9b43-81f3345adfd6.jpg?v=1752561778]]></image>
+      <brand><![CDATA[Hydrogen Vendor]]></brand>
+      <stock>50</stock>
+      <price>749.95</price>
+      <categories>
+        <categoryid>643344335181</categoryid>
+        <categoryid>643344367949</categoryid>
+      </categories>
+    </product>
+    <product>
+      <productid><![CDATA[10173507567949]]></productid>
+      <name><![CDATA[The 3p Fulfilled Snowboard]]></name>
+      <url><![CDATA[/products/the-3p-fulfilled-snowboard]]></url>
+      <image><![CDATA[https://cdn.shopify.com/s/files/1/0906/8583/3549/files/Main_b9e0da7f-db89-4d41-83f0-7f417b02831d.jpg?v=1752561778]]></image>
+      <brand><![CDATA[TweakwiseExport]]></brand>
+      <stock>20</stock>
+      <price>2629.95</price>
+      <categories>
+      </categories>
+    </product>
+    <product>
+      <productid><![CDATA[10173507600717]]></productid>
+      <name><![CDATA[The Multi-managed Snowboard]]></name>
+      <url><![CDATA[/products/the-multi-managed-snowboard]]></url>
+      <image><![CDATA[https://cdn.shopify.com/s/files/1/0906/8583/3549/files/Main_9129b69a-0c7b-4f66-b6cf-c4222f18028a.jpg?v=1752561778]]></image>
+      <brand><![CDATA[Multi-managed Vendor]]></brand>
+      <stock>100</stock>
+      <price>629.95</price>
+      <categories>
+        <categoryid>643344335181</categoryid>
+      </categories>
+    </product>
+    <product>
+      <productid><![CDATA[10173507699021]]></productid>
+      <name><![CDATA[Wooden Fence]]></name>
+      <url><![CDATA[/products/wooden-fence]]></url>
+      <image><![CDATA[https://cdn.shopify.com/s/files/1/0906/8583/3549/files/picket-fence-flowers_925x_be1303dd-30b4-4dce-adb2-f0982c513460.jpg?v=1752561778]]></image>
+      <brand><![CDATA[Rustic LTD]]></brand>
+      <stock>0</stock>
+      <price>200.00</price>
+      <categories>
+      </categories>
+    </product>
+    <product>
+      <productid><![CDATA[10173507731789]]></productid>
+      <name><![CDATA[Yellow Sofa]]></name>
+      <url><![CDATA[/products/yellow-sofa]]></url>
+      <image><![CDATA[https://cdn.shopify.com/s/files/1/0906/8583/3549/files/yellow-couch-by-black-and-white-mural_925x_7aa92773-e2eb-4a2b-989f-8da57c233742.jpg?v=1752561780]]></image>
+      <brand><![CDATA[Home Sweet Home]]></brand>
+      <stock>0</stock>
+      <price>99.99</price>
+      <categories>
+      </categories>
+    </product>
+    <product>
+      <productid><![CDATA[10173507797325]]></productid>
+      <name><![CDATA[Knitted Throw Pillows]]></name>
+      <url><![CDATA[/products/knitted-throw-pillows]]></url>
+      <image><![CDATA[https://cdn.shopify.com/s/files/1/0906/8583/3549/files/yellow-sofa-with-throw-pillows_925x_48cc42ab-51e7-4148-ad76-187d6c85b25c.jpg?v=1752561783]]></image>
+      <brand><![CDATA[Home Sweet Home]]></brand>
+      <stock>0</stock>
+      <price>19.99</price>
+      <categories>
+      </categories>
+    </product>
+    <product>
+      <productid><![CDATA[10173507895629]]></productid>
+      <name><![CDATA[Vanilla candle]]></name>
+      <url><![CDATA[/products/vanilla-candle]]></url>
+      <image><![CDATA[https://cdn.shopify.com/s/files/1/0906/8583/3549/files/diy-organic-candle_925x_1e019bec-90c2-4baf-9cc5-f88244c268d0.jpg?v=1752561785]]></image>
+      <brand><![CDATA[Home Sweet Home]]></brand>
+      <stock>0</stock>
+      <price>15.99</price>
+      <categories>
+      </categories>
+    </product>
+    <product>
+      <productid><![CDATA[10173507961165]]></productid>
+      <name><![CDATA[Black Beanbag]]></name>
+      <url><![CDATA[/products/black-bean-bag]]></url>
+      <image><![CDATA[https://cdn.shopify.com/s/files/1/0906/8583/3549/files/comfortable-living-room-cat_925x_8b22bf23-21d2-49c9-80d6-4e3bba7e5a69.jpg?v=1752561788]]></image>
+      <brand><![CDATA[Company 123]]></brand>
+      <stock>0</stock>
+      <price>69.99</price>
+      <categories>
+      </categories>
+    </product>
+    <product>
+      <productid><![CDATA[10173507993933]]></productid>
+      <name><![CDATA[Bedside Table]]></name>
+      <url><![CDATA[/products/bedside-table]]></url>
+      <image><![CDATA[https://cdn.shopify.com/s/files/1/0906/8583/3549/files/dark-wall-bedside-table_925x_3cd08ec8-34cf-414f-84ca-c491590c1f21.jpg?v=1752561790]]></image>
+      <brand><![CDATA[Company 123]]></brand>
+      <stock>0</stock>
+      <price>69.99</price>
+      <categories>
+      </categories>
+    </product>
+    <product>
+      <productid><![CDATA[10173885612365]]></productid>
+      <name><![CDATA[Orange Snowboard]]></name>
+      <url><![CDATA[/products/orange-snowboard]]></url>
+      <image><![CDATA[]]></image>
+      <brand><![CDATA[TweakwiseExport]]></brand>
+      <stock>0</stock>
+      <price>100.00</price>
+      <categories>
+      </categories>
+    </product>
+</products>
+</tweakwise>

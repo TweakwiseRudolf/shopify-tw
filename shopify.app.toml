@@ -1,9 +1,9 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "03c5fda104387ecafd82d8f9a6fe77c7"
-name = "tweakwise-export"
+name = "Tweakwise Export"
 handle = "tweakwise-export-1"
-application_url = "https://quad-differences-overhead-variety.trycloudflare.com"
+application_url = "https://ranks-directors-gore-receipt.trycloudflare.com"
 embedded = true
 
 [build]
@@ -26,7 +26,7 @@ api_version = "2025-07"
 scopes = "write_products"
 
 [auth]
-redirect_urls = ["https://quad-differences-overhead-variety.trycloudflare.com/auth/callback", "https://quad-differences-overhead-variety.trycloudflare.com/auth/shopify/callback", "https://quad-differences-overhead-variety.trycloudflare.com/api/auth/callback"]
+redirect_urls = ["https://ranks-directors-gore-receipt.trycloudflare.com/auth/callback", "https://ranks-directors-gore-receipt.trycloudflare.com/auth/shopify/callback", "https://ranks-directors-gore-receipt.trycloudflare.com/api/auth/callback"]
 
 [pos]
 embedded = false

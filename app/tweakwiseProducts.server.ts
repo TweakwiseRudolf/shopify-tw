@@ -50,6 +50,7 @@ export async function fetchAllProductsXml(request: Request) {
                   title
                   description
                 }
+                onlineStoreUrl
                 metafields(first: 10) {
                   edges {
                     node {
@@ -86,7 +87,7 @@ export async function fetchAllProductsXml(request: Request) {
   const itemsXml = allProducts.map((product: any) => {
     const itemId = product.id.replace('gid://shopify/Product/', '');
     const name = product.title;
-    const url = `/products/${product.handle}`;
+    const url = product.onlineStoreUrl ? product.onlineStoreUrl : `/products/${product.handle}`;
     const brand = product.vendor || "";
     const stock = typeof product.totalInventory === "number" ? product.totalInventory : "";
     const imageUrl = product.images.edges.length > 0 ? product.images.edges[0].node.url : "";

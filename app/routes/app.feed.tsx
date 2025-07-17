@@ -35,13 +35,12 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
 
 export default function GenerateFeed() {
-
   const fetcher = useFetcher<typeof action>();
   const generateFeed = () => fetcher.submit({}, { method: "POST" });
   const xmlUrl = fetcher.data?.xmlUrl;
   return (
     <Page>
-      <TitleBar title="Configure feed" />
+      <TitleBar title="Tweakwise Export" />
       <Layout>
         <Layout.Section>
           <Card>

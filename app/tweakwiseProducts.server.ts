@@ -1,121 +1,116 @@
 import { authenticate } from "app/shopify.server";
 import { generateTweakwiseAttributesXml } from "app/tweakwiseAttributes.server";
+import pLimit from "p-limit";
 
-export async function fetchAllProductsXml(request: Request) {
+export async function fetchAllProductsXml(request: Request, markets: any) {
   const { admin } = await authenticate.admin(request);
-  let hasNextPage = true;
-  let cursor: string | null = null;
-  const allProducts: any[] = [];
-  while (hasNextPage) {
-    const response = await admin.graphql(
-      `#graphql
-        query GetProducts($cursor: String) {
-          products(first: 100, after: $cursor) {
-            pageInfo {
-              hasNextPage
-            }
-            edges {
-              cursor
-              node {
-                id
-                title
-                handle
-                vendor
-                totalInventory
-                images(first: 1) {
-                  edges {
-                    node {
-                      url
-                    }
+
+  // Limit concurrency to 3 (safe for Shopify Admin API)
+  const limit = pLimit(3);
+
+  const allItems: string[] = [];
+
+  // Prepare all market/locale jobs
+  const jobs: Promise<void>[] = [];
+  for (const market of markets) {
+    const marketId = market.marketId;
+    for (const lang of market.locales) {
+      const langId = lang.langId;
+
+      jobs.push(limit(async () => {
+        let hasNextPage = true;
+        let cursor: string | null = null;
+
+        while (hasNextPage) {
+          const response = await admin.graphql(
+            `#graphql
+              query GetProducts($cursor: String, $locale: String!) {
+                products(first: 100, after: $cursor) {
+                  pageInfo {
+                    hasNextPage
                   }
-                }
-                variants(first: 1) {
                   edges {
-                    node {
-                      price
-                      sku
-                    }
-                  }
-                }
-                collections(first: 100) {
-                  edges {
+                    cursor
                     node {
                       id
                       title
                       handle
+                      vendor
+                      totalInventory
+                      images(first: 1) {
+                        edges { node { url } }
+                      }
+                      variants(first: 1) {
+                        edges { node { price sku } }
+                      }
+                      collections(first: 100) {
+                        edges { node { id title handle } }
+                      }
+                      onlineStoreUrl
+                      tags
+                      createdAt
+                      updatedAt
+                      publishedAt
+                      translations(locale: $locale) {
+                        key
+                        value
+                      }
                     }
                   }
                 }
-                seo {
-                  title
-                  description
-                }
-                onlineStoreUrl
-                metafields(first: 10) {
-                  edges {
-                    node {
-                      namespace
-                      key
-                      value
-                    }
-                  }
-                }
-                options {
-                  name
-                  values
-                }
-                tags
-                createdAt
-                updatedAt
-                publishedAt
-              }
-            }
+              }`,
+            { variables: { cursor, locale: lang.locale } }
+          );
+          const responseJson: any = await response.json();
+          const products = responseJson.data.products;
+          hasNextPage = products.pageInfo.hasNextPage;
+          cursor = products.edges.length > 0 ? products.edges[products.edges.length - 1].cursor : null;
+
+          for (const edge of products.edges) {
+            const product = edge.node;
+            const translatedName = product.translations?.find((t: any) => t.key === "title")?.value || product.title;
+
+            const itemId = `${langId}_${product.id.replace('gid://shopify/Product/', '')}`;
+            const url = product.onlineStoreUrl ? product.onlineStoreUrl : `/products/${product.handle}`;
+            const brand = product.vendor || "";
+            const stock = typeof product.totalInventory === "number" ? product.totalInventory : "";
+            const imageUrl = product.images.edges.length > 0 ? product.images.edges[0].node.url : "";
+            const price = (product.variants.edges.length > 0 && product.variants.edges[0].node.price)
+              ? product.variants.edges[0].node.price
+              : "0";
+            // Prefix categoryId with langId
+            const categoryIds = product.collections.edges.map((edge: any) => {
+              const collectionShortId = edge.node.id.split('/').pop();
+              return `${langId}_${collectionShortId}`;
+            });
+
+            allItems.push([
+              "    <item>",
+              `      <id><![CDATA[${itemId}]]></id>`,
+              `      <name><![CDATA[${translatedName}]]></name>`,
+              `      <url><![CDATA[${url}]]></url>`,
+              `      <image><![CDATA[${imageUrl}]]></image>`,
+              `      <brand><![CDATA[${brand}]]></brand>`,
+              `      <stock>${stock}</stock>`,
+              `      <price>${price}</price>`,
+              generateTweakwiseAttributesXml(product),
+              "      <categories>",
+              ...categoryIds.map((cid: string) => `        <categoryid>${cid}</categoryid>`),
+              "      </categories>",
+              "    </item>"
+            ].join("\n"));
           }
-        }`,
-      { variables: { cursor } },
-    );
-    const responseJson: any = await response.json();
-    console.log('Shopify GraphQL response:', JSON.stringify(responseJson, null, 2));
-    const products = responseJson.data!.products;
-    allProducts.push(...products.edges.map((edge: any) => edge.node));
-    hasNextPage = products.pageInfo.hasNextPage;
-    cursor = products.edges[products.edges.length - 1].cursor;
+        }
+      }));
+    }
   }
 
-  // Generate Tweakwise-compliant <products> XML
-  // See: https://docs.tweakwise.com/docs/create-an-xml-feed-to-import-product-data-in-tweakwise
-  const itemsXml = allProducts.map((product: any) => {
-    const itemId = product.id.replace('gid://shopify/Product/', '');
-    const name = product.title;
-    const url = product.onlineStoreUrl ? product.onlineStoreUrl : `/products/${product.handle}`;
-    const brand = product.vendor || "";
-    const stock = typeof product.totalInventory === "number" ? product.totalInventory : "";
-    const imageUrl = product.images.edges.length > 0 ? product.images.edges[0].node.url : "";
-    const price = (product.variants.edges.length > 0 && product.variants.edges[0].node.price)
-      ? product.variants.edges[0].node.price
-      : "0";
-    const categoryIds = product.collections.edges.map((edge: any) => edge.node.id.replace('gid://shopify/Collection/', ''));
-    return [
-      "    <item>",
-      `      <id><![CDATA[${itemId}]]></id>`,
-      `      <name><![CDATA[${name}]]></name>`,
-      `      <url><![CDATA[${url}]]></url>`,
-      `      <image><![CDATA[${imageUrl}]]></image>`,
-      `      <brand><![CDATA[${brand}]]></brand>`,
-      `      <stock>${stock}</stock>`,
-      `      <price>${price}</price>`,
-      generateTweakwiseAttributesXml(product),
-      "      <categories>",
-      ...categoryIds.map((cid: string) => `        <categoryid>${cid}</categoryid>`),
-      "      </categories>",
-      "    </item>"
-    ].join("\n");
-  }).join("\n");
+  // Await all jobs
+  await Promise.all(jobs);
 
   return [
     "<items>",
-    itemsXml,
+    allItems.join("\n"),
     "</items>"
   ].join("\n");
-// Removed stray closing brace
 }

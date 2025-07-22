@@ -1,5 +1,5 @@
 {
-  "name": "Tweakwise Export",
+  "name": "tweakwise-export",
   "private": true,
   "scripts": {
     "build": "remix vite:build",

@@ -1,41 +1,9 @@
 import { authenticate } from "app/shopify.server";
+import { fetchMarketsWithLocales } from "./tweakwiseMarketsLocales.server";
 
-export async function fetchCollectionsAndGenerateCategoriesXml(request: Request) {
-  const { admin } = await authenticate.admin(request);
-  // Fetch custom collections
-  let hasNextPage = true;
-  let cursor: string | null = null;
-  const allCollections: any[] = [];
-  while (hasNextPage) {
-    const response = await admin.graphql(
-      `#graphql
-        query GetCollections($cursor: String) {
-          collections(first: 100, after: $cursor) {
-            pageInfo {
-              hasNextPage
-            }
-            edges {
-              cursor
-              node {
-                id
-                title
-                handle
-              }
-            }
-          }
-        }`,
-      { variables: { cursor } },
-    );
-    const responseJson: any = await response.json();
-    const collections = responseJson.data!.collections;
-    allCollections.push(...collections.edges.map((edge: any) => edge.node));
-    hasNextPage = collections.pageInfo.hasNextPage;
-    cursor = collections.edges[collections.edges.length - 1].cursor;
-  }
-
+export async function fetchCollectionsAndGenerateCategoriesXml(request: Request, markets: any) {
   // Generate <categories> XML block
   const rootCategoryId = "1";
-  let rank = 1;
   const categoriesXml = [
     [
       "    <category>",
@@ -45,21 +13,89 @@ export async function fetchCollectionsAndGenerateCategoriesXml(request: Request)
       "    </category>"
     ].join("\n")
   ];
-  for (const col of allCollections) {
-    const cleanId = col.id.replace('gid://shopify/Collection/', '');
+
+  for (const market of markets) {
+    const marketId = market.marketId;
     categoriesXml.push([
       "    <category>",
-      `      <categoryid>${cleanId}</categoryid>`,
-      `      <name><![CDATA[${col.title}]]></name>`,
-      `      <url><![CDATA[/collections/${col.handle}]]></url>`,
-      `      <rank>${rank}</rank>`,
+      `      <categoryid>${marketId}</categoryid>`,
+      `      <name><![CDATA[${market.name}]]></name>`,
+      "      <rank>1</rank>",
       "      <parents>",
       `        <categoryid>${rootCategoryId}</categoryid>`,
       "      </parents>",
       "    </category>"
     ].join("\n"));
-    rank++;
+
+    for (const lang of market.locales) {
+      const langId = lang.langId;
+      categoriesXml.push([
+        "    <category>",
+        `      <categoryid>${langId}</categoryid>`,
+        `      <name><![CDATA[${lang.name}]]></name>`,
+        "      <rank>2</rank>",
+        "      <parents>",
+        `        <categoryid>${marketId}</categoryid>`,
+        "      </parents>",
+        "    </category>"
+      ].join("\n"));
+
+      // Fetch collections in the correct language for this market/locale
+      const { admin } = await authenticate.admin(request);
+      let hasNextPage = true;
+      let cursor: string | null = null;
+      while (hasNextPage) {
+        const collectionsResponse = await admin.graphql(
+          `#graphql
+            query GetCollections($cursor: String, $locale: String!) {
+              collections(first: 100, after: $cursor) {
+                pageInfo {
+                  hasNextPage
+                }
+                edges {
+                  cursor
+                  node {
+                    id
+                    title
+                    handle
+                    translations(locale: $locale) {
+                      key
+                      value
+                    }
+                  }
+                }
+              }
+            }`,
+          { variables: { cursor, locale: lang.locale } }
+        );
+        const collectionsJson: any = await collectionsResponse.json();
+        const collections = collectionsJson.data.collections;
+        hasNextPage = collections.pageInfo.hasNextPage;
+        cursor = collections.edges.length > 0 ? collections.edges[collections.edges.length - 1].cursor : null;
+
+        for (const edge of collections.edges) {
+          const col = edge.node;
+          const collectionShortId = col.id.split('/').pop();
+          const cleanId = `${langId}_${collectionShortId}`;
+          const translatedTitle = col.translations?.find((t: any) => t.key === "title")?.value || col.title;
+          const translatedHandle = col.translations?.find((t: any) => t.key === "handle")?.value || col.handle;
+
+          categoriesXml.push([
+            "    <category>",
+            `      <categoryid>${cleanId}</categoryid>`,
+            `      <name><![CDATA[${translatedTitle}]]></name>`,
+            `      <url><![CDATA[/collections/${translatedHandle}]]></url>`,
+            `      <rank>3</rank>`,
+            "      <parents>",
+            `        <categoryid>${langId}</categoryid>`,
+            "      </parents>",
+            "    </category>"
+          ].join("\n"));
+        }
+      }
+    }
   }
+
   return [
     "<categories>",
     ...categoriesXml,

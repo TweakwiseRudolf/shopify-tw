@@ -1,7 +1,12 @@
 import { authenticate } from "app/shopify.server";
-import { fetchMarketsWithLocales } from "./tweakwiseMarketsLocales.server";
+import { getShopBaseUrl, buildLocaleAwareUrl } from "./tweakwiseUrlBuilder.server";
 
 export async function fetchCollectionsAndGenerateCategoriesXml(request: Request, markets: any) {
+  const { admin } = await authenticate.admin(request);
+  
+  // Get base URL once
+  const baseUrl = await getShopBaseUrl(request);
+
   // Generate <categories> XML block
   const rootCategoryId = "1";
   const categoriesXml = [
@@ -41,7 +46,6 @@ export async function fetchCollectionsAndGenerateCategoriesXml(request: Request,
       ].join("\n"));
 
       // Fetch collections in the correct language for this market/locale
-      const { admin } = await authenticate.admin(request);
       let hasNextPage = true;
       let cursor: string | null = null;
       while (hasNextPage) {
@@ -80,11 +84,19 @@ export async function fetchCollectionsAndGenerateCategoriesXml(request: Request,
           const translatedTitle = col.translations?.find((t: any) => t.key === "title")?.value || col.title;
           const translatedHandle = col.translations?.find((t: any) => t.key === "handle")?.value || col.handle;
 
+          // Use centralized URL builder
+          const collectionUrl = buildLocaleAwareUrl(
+            baseUrl,
+            lang.locale,
+            market.locales,
+            `/collections/${translatedHandle}`
+          );
+
           categoriesXml.push([
             "    <category>",
             `      <categoryid>${cleanId}</categoryid>`,
             `      <name><![CDATA[${translatedTitle}]]></name>`,
-            `      <url><![CDATA[/collections/${translatedHandle}]]></url>`,
+            `      <url><![CDATA[${collectionUrl}]]></url>`,
             `      <rank>3</rank>`,
             "      <parents>",
             `        <categoryid>${langId}</categoryid>`,

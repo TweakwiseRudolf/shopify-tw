@@ -1,31 +1,64 @@
 import { authenticate } from "app/shopify.server";
 import { generateTweakwiseAttributesXml } from "app/tweakwiseAttributes.server";
-import pLimit from "p-limit";
+import { getShopBaseUrl, buildLocaleAwareUrl } from "./tweakwiseUrlBuilder.server";
+
+async function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function makeGraphQLRequestWithRetry(admin: any, query: string, variables: any, maxRetries = 3) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await admin.graphql(query, { variables });
+      const responseJson = await response.json();
+      
+      // Check for GraphQL errors
+      if (responseJson.errors) {
+        throw new Error(`GraphQL Error: ${JSON.stringify(responseJson.errors)}`);
+      }
+      
+      return responseJson;
+    } catch (error: any) {
+      if (error.message?.includes('Throttled') && attempt < maxRetries) {
+        // Exponential backoff: 2^attempt seconds
+        const waitTime = Math.pow(2, attempt) * 1000;
+        console.log(`Request throttled, waiting ${waitTime}ms before retry ${attempt}/${maxRetries}`);
+        await sleep(waitTime);
+        continue;
+      }
+      throw error;
+    }
+  }
+}
 
 export async function fetchAllProductsXml(request: Request, markets: any) {
   const { admin } = await authenticate.admin(request);
-
-  // Limit concurrency to 3 (safe for Shopify Admin API)
-  const limit = pLimit(3);
+  
+  // Get base URL once
+  const baseUrl = await getShopBaseUrl(request);
 
   const allItems: string[] = [];
 
-  // Prepare all market/locale jobs
-  const jobs: Promise<void>[] = [];
+  // Process markets/locales sequentially to avoid rate limits
   for (const market of markets) {
     const marketId = market.marketId;
     for (const lang of market.locales) {
       const langId = lang.langId;
+      console.log(`Processing market: ${market.name}, locale: ${lang.locale}`);
 
-      jobs.push(limit(async () => {
-        let hasNextPage = true;
-        let cursor: string | null = null;
+      let hasNextPage = true;
+      let cursor: string | null = null;
 
-        while (hasNextPage) {
-          const response = await admin.graphql(
+      while (hasNextPage) {
+        // Add delay between each request
+        await sleep(500);
+
+        try {
+          const responseJson = await makeGraphQLRequestWithRetry(
+            admin,
             `#graphql
               query GetProducts($cursor: String, $locale: String!) {
-                products(first: 100, after: $cursor) {
+                products(first: 25, after: $cursor) {
                   pageInfo {
                     hasNextPage
                   }
@@ -40,10 +73,29 @@ export async function fetchAllProductsXml(request: Request, markets: any) {
                       images(first: 1) {
                         edges { node { url } }
                       }
-                      variants(first: 1) {
-                        edges { node { price sku } }
+                      variants(first: 50) {
+                        edges { 
+                          node { 
+                            id
+                            price 
+                            sku
+                            inventoryQuantity
+                            availableForSale
+                            compareAtPrice
+                            title
+                            selectedOptions {
+                              name
+                              value
+                            }
+                            displayName
+                            barcode
+                            image {
+                              url
+                            }
+                          } 
+                        }
                       }
-                      collections(first: 100) {
+                      collections(first: 50) {
                         edges { node { id title handle } }
                       }
                       onlineStoreUrl
@@ -59,9 +111,9 @@ export async function fetchAllProductsXml(request: Request, markets: any) {
                   }
                 }
               }`,
-            { variables: { cursor, locale: lang.locale } }
+            { cursor, locale: lang.locale }
           );
-          const responseJson: any = await response.json();
+
           const products = responseJson.data.products;
           hasNextPage = products.pageInfo.hasNextPage;
           cursor = products.edges.length > 0 ? products.edges[products.edges.length - 1].cursor : null;
@@ -69,44 +121,101 @@ export async function fetchAllProductsXml(request: Request, markets: any) {
           for (const edge of products.edges) {
             const product = edge.node;
             const translatedName = product.translations?.find((t: any) => t.key === "title")?.value || product.title;
+            const translatedHandle = product.translations?.find((t: any) => t.key === "handle")?.value || product.handle;
 
-            const itemId = `${langId}_${product.id.replace('gid://shopify/Product/', '')}`;
-            const url = product.onlineStoreUrl ? product.onlineStoreUrl : `/products/${product.handle}`;
+            const productShortId = product.id.replace('gid://shopify/Product/', '');
+            const groupCode = `${langId}_${productShortId}`;
+            
             const brand = product.vendor || "";
-            const stock = typeof product.totalInventory === "number" ? product.totalInventory : "";
-            const imageUrl = product.images.edges.length > 0 ? product.images.edges[0].node.url : "";
-            const price = (product.variants.edges.length > 0 && product.variants.edges[0].node.price)
-              ? product.variants.edges[0].node.price
-              : "0";
+            // Product fallback image
+            const productImageUrl = product.images.edges.length > 0 ? product.images.edges[0].node.url : "";
+            
             // Prefix categoryId with langId
             const categoryIds = product.collections.edges.map((edge: any) => {
               const collectionShortId = edge.node.id.split('/').pop();
               return `${langId}_${collectionShortId}`;
             });
 
-            allItems.push([
-              "    <item>",
-              `      <id><![CDATA[${itemId}]]></id>`,
-              `      <name><![CDATA[${translatedName}]]></name>`,
-              `      <url><![CDATA[${url}]]></url>`,
-              `      <image><![CDATA[${imageUrl}]]></image>`,
-              `      <brand><![CDATA[${brand}]]></brand>`,
-              `      <stock>${stock}</stock>`,
-              `      <price>${price}</price>`,
-              generateTweakwiseAttributesXml(product),
-              "      <categories>",
-              ...categoryIds.map((cid: string) => `        <categoryid>${cid}</categoryid>`),
-              "      </categories>",
-              "    </item>"
-            ].join("\n"));
+            // If product has variants, create an item for each variant
+            if (product.variants.edges.length > 0) {
+              for (const variantEdge of product.variants.edges) {
+                const variant = variantEdge.node;
+                const variantShortId = variant.id.replace('gid://shopify/ProductVariant/', '');
+                const itemId = `${langId}_${variantShortId}`;
+                
+                // Use variant-specific data
+                const variantName = variant.title && variant.title !== "Default Title" 
+                  ? `${translatedName} - ${variant.title}` 
+                  : translatedName;
+                const stock = typeof variant.inventoryQuantity === "number" ? variant.inventoryQuantity : "";
+                const price = variant.price || "0";
+
+                // Use variant image if available, fallback to product image
+                const imageUrl = variant.image?.url || productImageUrl;
+
+                // Build variant-specific URL
+                const variantUrl = buildLocaleAwareUrl(
+                  baseUrl,
+                  lang.locale,
+                  market.locales,
+                  `/products/${translatedHandle}?variant=${variantShortId}`
+                );
+
+                allItems.push([
+                  "    <item>",
+                  `      <id><![CDATA[${itemId}]]></id>`,
+                  `      <groupcode><![CDATA[${groupCode}]]></groupcode>`,
+                  `      <name><![CDATA[${variantName}]]></name>`,
+                  `      <url><![CDATA[${variantUrl}]]></url>`,
+                  `      <image><![CDATA[${imageUrl}]]></image>`,
+                  `      <brand><![CDATA[${brand}]]></brand>`,
+                  `      <stock>${stock}</stock>`,
+                  `      <price>${price}</price>`,
+                  generateTweakwiseAttributesXml(product, lang.locale, variant),
+                  "      <categories>",
+                  ...categoryIds.map((cid: string) => `        <categoryid>${cid}</categoryid>`),
+                  "      </categories>",
+                  "    </item>"
+                ].join("\n"));
+              }
+            } else {
+              // No variants, use product image
+              const productUrl = buildLocaleAwareUrl(
+                baseUrl,
+                lang.locale,
+                market.locales,
+                `/products/${translatedHandle}`
+              );
+
+              const itemId = groupCode;
+              const stock = typeof product.totalInventory === "number" ? product.totalInventory : "";
+              const price = "0"; // No variant price available
+
+              allItems.push([
+                "    <item>",
+                `      <id><![CDATA[${itemId}]]></id>`,
+                `      <groupcode><![CDATA[${groupCode}]]></groupcode>`,
+                `      <name><![CDATA[${translatedName}]]></name>`,
+                `      <url><![CDATA[${productUrl}]]></url>`,
+                `      <image><![CDATA[${productImageUrl}]]></image>`,
+                `      <brand><![CDATA[${brand}]]></brand>`,
+                `      <stock>${stock}</stock>`,
+                `      <price>${price}</price>`,
+                generateTweakwiseAttributesXml(product, lang.locale),
+                "      <categories>",
+                ...categoryIds.map((cid: string) => `        <categoryid>${cid}</categoryid>`),
+                "      </categories>",
+                "    </item>"
+              ].join("\n"));
+            }
           }
+        } catch (error) {
+          console.error(`Error processing market ${market.name}, locale ${lang.locale}:`, error);
+          throw error;
         }
-      }));
+      }
     }
   }
-
-  // Await all jobs
-  await Promise.all(jobs);
 
   return [
     "<items>",

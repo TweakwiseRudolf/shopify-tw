@@ -1,58 +1,118 @@
 import { authenticate } from "app/shopify.server";
 import { getShopBaseUrl, buildLocaleAwareUrl } from "./tweakwiseUrlBuilder.server";
 
+async function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function makeGraphQLRequestWithRetry(admin: any, query: string, variables: any, maxRetries = 3) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await admin.graphql(query, { variables });
+      const responseJson = await response.json();
+      
+      if (responseJson.errors) {
+        throw new Error(`GraphQL Error: ${JSON.stringify(responseJson.errors)}`);
+      }
+      
+      return responseJson;
+    } catch (error: any) {
+      if (error.message?.includes('Throttled') && attempt < maxRetries) {
+        const waitTime = Math.pow(2, attempt) * 1000;
+        console.log(`Request throttled, waiting ${waitTime}ms before retry ${attempt}/${maxRetries}`);
+        await sleep(waitTime);
+        continue;
+      }
+      throw error;
+    }
+  }
+}
+
 export async function fetchCollectionsAndGenerateCategoriesXml(request: Request, markets: any) {
   const { admin } = await authenticate.admin(request);
-  
-  // Get base URL once
   const baseUrl = await getShopBaseUrl(request);
 
-  // Generate <categories> XML block
-  const rootCategoryId = "1";
-  const categoriesXml = [
-    [
-      "    <category>",
-      `      <categoryid>${rootCategoryId}</categoryid>`,
-      "      <name><![CDATA[root]]></name>",
-      "      <rank>0</rank>",
-      "    </category>"
-    ].join("\n")
-  ];
+  const categoriesXml: string[] = [];
 
-  for (const market of markets) {
-    const marketId = market.marketId;
-    categoriesXml.push([
+  // Creates category XML with optional parent and URL
+  function createCategoryXml(categoryId: string, name: string, rank: number, parentId?: string, url?: string): string {
+    const category = [
       "    <category>",
-      `      <categoryid>${marketId}</categoryid>`,
-      `      <name><![CDATA[${market.name}]]></name>`,
-      "      <rank>1</rank>",
-      "      <parents>",
-      `        <categoryid>${rootCategoryId}</categoryid>`,
-      "      </parents>",
+      `      <categoryid>${categoryId}</categoryid>`,
+      `      <name><![CDATA[${name}]]></name>`,
+      url ? `      <url><![CDATA[${url}]]></url>` : null,
+      `      <rank>${rank}</rank>`,
+      parentId ? "      <parents>" : null,
+      parentId ? `        <categoryid>${parentId}</categoryid>` : null,
+      parentId ? "      </parents>" : null,
       "    </category>"
-    ].join("\n"));
+    ].filter(Boolean).join("\n");
+    
+    return category;
+  }
+
+  // Gets translated value from translations array or returns fallback
+  function getTranslatedValue(translations: any[], key: string, fallback: string): string {
+    return translations?.find((t: any) => t.key === key)?.value || fallback;
+  }
+
+  // Creates root category
+  addRootCategory();
+  
+  // Process markets sequentially to avoid rate limits
+  for (const market of markets) {
+    await sleep(200);
+    await processMarket(market);
+  }
+
+  return [
+    "<categories>",
+    ...categoriesXml,
+    "</categories>"
+  ].join("\n");
+
+  // Creates the top-level root category
+  function addRootCategory() {
+    const rootCategoryId = "1";
+    categoriesXml.push(createCategoryXml(rootCategoryId, "root", 0));
+  }
+
+  // Processes a market and its locales
+  async function processMarket(market: any) {
+    const marketId = market.marketId;
+    const rootCategoryId = "1";
+    
+    categoriesXml.push(createCategoryXml(marketId, market.name, 1, rootCategoryId));
 
     for (const lang of market.locales) {
-      const langId = lang.langId;
-      categoriesXml.push([
-        "    <category>",
-        `      <categoryid>${langId}</categoryid>`,
-        `      <name><![CDATA[${lang.name}]]></name>`,
-        "      <rank>2</rank>",
-        "      <parents>",
-        `        <categoryid>${marketId}</categoryid>`,
-        "      </parents>",
-        "    </category>"
-      ].join("\n"));
+      await sleep(200);
+      await processLocale(market, lang, marketId);
+    }
+  }
 
-      // Fetch collections in the correct language for this market/locale
-      let hasNextPage = true;
-      let cursor: string | null = null;
-      while (hasNextPage) {
-        const collectionsResponse = await admin.graphql(
+  // Processes a locale and fetches its collections
+  async function processLocale(market: any, lang: any, marketId: string) {
+    const langId = lang.langId;
+    
+    categoriesXml.push(createCategoryXml(langId, lang.name, 2, marketId));
+
+    await fetchAndProcessCollections(market, lang, langId);
+  }
+
+  // Fetches collections for a locale with pagination
+  async function fetchAndProcessCollections(market: any, lang: any, langId: string) {
+    let hasNextPage = true;
+    let cursor: string | null = null;
+
+    while (hasNextPage) {
+      await sleep(300);
+
+      try {
+        const responseJson = await makeGraphQLRequestWithRetry(
+          admin,
           `#graphql
             query GetCollections($cursor: String, $locale: String!) {
-              collections(first: 100, after: $cursor) {
+              collections(first: 50, after: $cursor) {
                 pageInfo {
                   hasNextPage
                 }
@@ -70,47 +130,40 @@ export async function fetchCollectionsAndGenerateCategoriesXml(request: Request,
                 }
               }
             }`,
-          { variables: { cursor, locale: lang.locale } }
+          { cursor, locale: lang.locale }
         );
-        const collectionsJson: any = await collectionsResponse.json();
-        const collections = collectionsJson.data.collections;
+
+        const collections = responseJson.data.collections;
         hasNextPage = collections.pageInfo.hasNextPage;
         cursor = collections.edges.length > 0 ? collections.edges[collections.edges.length - 1].cursor : null;
 
-        for (const edge of collections.edges) {
-          const col = edge.node;
-          const collectionShortId = col.id.split('/').pop();
-          const cleanId = `${langId}_${collectionShortId}`;
-          const translatedTitle = col.translations?.find((t: any) => t.key === "title")?.value || col.title;
-          const translatedHandle = col.translations?.find((t: any) => t.key === "handle")?.value || col.handle;
-
-          // Use centralized URL builder
-          const collectionUrl = buildLocaleAwareUrl(
-            baseUrl,
-            lang.locale,
-            market.locales,
-            `/collections/${translatedHandle}`
-          );
-
-          categoriesXml.push([
-            "    <category>",
-            `      <categoryid>${cleanId}</categoryid>`,
-            `      <name><![CDATA[${translatedTitle}]]></name>`,
-            `      <url><![CDATA[${collectionUrl}]]></url>`,
-            `      <rank>3</rank>`,
-            "      <parents>",
-            `        <categoryid>${langId}</categoryid>`,
-            "      </parents>",
-            "    </category>"
-          ].join("\n"));
-        }
+        processCollections(collections.edges, market, lang, langId);
+        
+      } catch (error) {
+        console.error(`Error fetching collections for market ${market.name}, locale ${lang.locale}:`, error);
+        throw error;
       }
     }
   }
 
-  return [
-    "<categories>",
-    ...categoriesXml,
-    "</categories>"
-  ].join("\n");
+  // Processes collection data and creates category XML
+  function processCollections(collectionEdges: any[], market: any, lang: any, langId: string) {
+    collectionEdges.forEach(edge => {
+      const col = edge.node;
+      const collectionShortId = col.id.split('/').pop();
+      const cleanId = `${langId}_${collectionShortId}`;
+      
+      const translatedTitle = getTranslatedValue(col.translations, "title", col.title);
+      const translatedHandle = getTranslatedValue(col.translations, "handle", col.handle);
+
+      const collectionUrl = buildLocaleAwareUrl(
+        baseUrl,
+        lang.locale,
+        market.locales,
+        `/collections/${translatedHandle}`
+      );
+
+      categoriesXml.push(createCategoryXml(cleanId, translatedTitle, 3, langId, collectionUrl));
+    });
+  }
 }

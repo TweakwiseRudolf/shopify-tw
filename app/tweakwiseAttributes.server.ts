@@ -2,17 +2,19 @@
 // Generates the <attributes> XML block for a Tweakwise item, given a product object from Shopify
 
 export function generateTweakwiseAttributesXml(product: any, locale?: string, variant?: any): string {
-  // Example: always include item_type, but you can add more logic here
   const attributes: string[] = [];
-  // item_type
-  attributes.push(
-    "        <attribute>",
-    "          <name>item_type</name>",
-    "          <value>product</value>",
-    "        </attribute>"
-  );
 
-  // Helper function to get translated value
+  // Adds an attribute to the attributes array
+  function addAttribute(name: string, value: string) {
+    attributes.push(
+      "        <attribute>",
+      `          <name>${name}</name>`,
+      `          <value><![CDATA[${value}]]></value>`,
+      "        </attribute>"
+    );
+  }
+
+  // Gets translated value from product translations or returns fallback
   function getTranslatedValue(key: string, fallback: string): string {
     if (locale && product.translations) {
       const translation = product.translations.find((t: any) => t.key === key);
@@ -21,206 +23,119 @@ export function generateTweakwiseAttributesXml(product: any, locale?: string, va
     return fallback;
   }
 
-  // SEO title (translated)
-  if (product.seo && product.seo.title) {
-    const translatedSeoTitle = getTranslatedValue('seo_title', product.seo.title);
-    attributes.push(
-      "        <attribute>",
-      "          <name>seo_title</name>",
-      `          <value><![CDATA[${translatedSeoTitle}]]></value>`,
-      "        </attribute>"
-    );
+  // Safely adds variant attribute if value exists
+  function addVariantAttribute(variant: any, field: string, attributeName?: string) {
+    const name = attributeName || field;
+    if (variant[field] !== undefined && variant[field] !== null && variant[field] !== '') {
+      addAttribute(name, variant[field]);
+    }
   }
 
-  // SEO description (translated)
-  if (product.seo && product.seo.description) {
-    const translatedSeoDescription = getTranslatedValue('seo_description', product.seo.description);
-    attributes.push(
-      "        <attribute>",
-      "          <name>seo_description</name>",
-      `          <value><![CDATA[${translatedSeoDescription}]]></value>`,
-      "        </attribute>"
-    );
-  }
+  addAttribute("item_type", "product");
 
-  // If variant is provided, use variant-specific data; otherwise use all variants
+  addSeoAttributes();
+  
   if (variant) {
-    // Single variant attributes
-    if (variant.sku) {
-      attributes.push(
-        "        <attribute>",
-        "          <name>sku</name>",
-        `          <value><![CDATA[${variant.sku}]]></value>`,
-        "        </attribute>"
-      );
-    }
-    if (variant.barcode) {
-      attributes.push(
-        "        <attribute>",
-        "          <name>barcode</name>",
-        `          <value><![CDATA[${variant.barcode}]]></value>`,
-        "        </attribute>"
-      );
-    }
-    if (variant.displayName) {
-      attributes.push(
-        "        <attribute>",
-        "          <name>displayName</name>",
-        `          <value><![CDATA[${variant.displayName}]]></value>`,
-        "        </attribute>"
-      );
-    }
-    if (typeof variant.availableForSale !== 'undefined') {
-      attributes.push(
-        "        <attribute>",
-        "          <name>availableForSale</name>",
-        `          <value><![CDATA[${variant.availableForSale}]]></value>`,
-        "        </attribute>"
-      );
-    }
-    if (typeof variant.compareAtPrice !== 'undefined' && variant.compareAtPrice !== null) {
-      attributes.push(
-        "        <attribute>",
-        "          <name>compareAtPrice</name>",
-        `          <value><![CDATA[${variant.compareAtPrice}]]></value>`,
-        "        </attribute>"
-      );
-    }
-    
-    // Variant selected options - these make the variant unique
-    if (variant.selectedOptions && variant.selectedOptions.length > 0) {
-      for (const option of variant.selectedOptions) {
-        // Add combined format: selected_options with "option_name: option_value"
-        attributes.push(
-          "        <attribute>",
-          "          <name>selected_options</name>",
-          `          <value><![CDATA[${option.name}: ${option.value}]]></value>`,
-          "        </attribute>"
-        );
-        
-        // Add individual option as separate attribute
-        attributes.push(
-          "        <attribute>",
-          `          <name>${option.name.toLowerCase()}</name>`,
-          `          <value><![CDATA[${option.value}]]></value>`,
-          "        </attribute>"
-        );
-      }
-    }
+    addVariantSpecificAttributes();
   } else {
-    // All variant attributes (fallback for products without specific variant)
-    if (product.variants && product.variants.edges.length > 0) {
-      for (const edge of product.variants.edges) {
-        const v = edge.node;
-        if (v.sku) {
-          attributes.push(
-            "        <attribute>",
-            "          <name>sku</name>",
-            `          <value><![CDATA[${v.sku}]]></value>`,
-            "        </attribute>"
-          );
-        }
-        if (v.barcode) {
-          attributes.push(
-            "        <attribute>",
-            "          <name>barcode</name>",
-            `          <value><![CDATA[${v.barcode}]]></value>`,
-            "        </attribute>"
-          );
-        }
-        if (typeof v.availableForSale !== 'undefined') {
-          attributes.push(
-            "        <attribute>",
-            "          <name>availableForSale</name>",
-            `          <value><![CDATA[${v.availableForSale}]]></value>`,
-            "        </attribute>"
-          );
-        }
-        if (typeof v.compareAtPrice !== 'undefined' && v.compareAtPrice !== null) {
-          attributes.push(
-            "        <attribute>",
-            "          <name>compareAtPrice</name>",
-            `          <value><![CDATA[${v.compareAtPrice}]]></value>`,
-            "        </attribute>"
-          );
-        }
-      }
-    }
+    addAllVariantAttributes();
   }
 
-  // Metafields (translated)
-  if (product.metafields && product.metafields.edges.length > 0) {
-    for (const edge of product.metafields.edges) {
-      const mf = edge.node;
-      const translatedMetafieldValue = getTranslatedValue(`metafield_${mf.namespace}_${mf.key}`, mf.value);
-      attributes.push(
-        "        <attribute>",
-        `          <name>metafield_${mf.namespace}_${mf.key}</name>`,
-        `          <value><![CDATA[${translatedMetafieldValue}]]></value>`,
-        "        </attribute>"
-      );
-    }
-  }
-
-  // Product options (if no specific variant provided)
-  if (!variant && product.options && product.options.length > 0) {
-    for (const option of product.options) {
-      if (option.values && option.values.length > 0) {
-        for (const value of option.values) {
-          const translatedOptionValue = getTranslatedValue(`option_${option.name}`, value);
-          attributes.push(
-            "        <attribute>",
-            `          <name>option_${option.name}</name>`,
-            `          <value><![CDATA[${translatedOptionValue}]]></value>`,
-            "        </attribute>"
-          );
-        }
-      }
-    }
-  }
-
-  // Tags: each tag as its own attribute with name 'tags' (translated)
-  if (product.tags && product.tags.length > 0) {
-    for (const tag of product.tags) {
-      const translatedTag = getTranslatedValue(`tag_${tag}`, tag);
-      attributes.push(
-        "        <attribute>",
-        "          <name>tags</name>",
-        `          <value><![CDATA[${translatedTag}]]></value>`,
-        "        </attribute>"
-      );
-    }
-  }
-
-  // Date fields
-  if (product.createdAt) {
-    attributes.push(
-      "        <attribute>",
-      "          <name>createdAt</name>",
-      `          <value><![CDATA[${product.createdAt}]]></value>`,
-      "        </attribute>"
-    );
-  }
-  if (product.updatedAt) {
-    attributes.push(
-      "        <attribute>",
-      "          <name>updatedAt</name>",
-      `          <value><![CDATA[${product.updatedAt}]]></value>`,
-      "        </attribute>"
-    );
-  }
-  if (product.publishedAt) {
-    attributes.push(
-      "        <attribute>",
-      "          <name>publishedAt</name>",
-      `          <value><![CDATA[${product.publishedAt}]]></value>`,
-      "        </attribute>"
-    );
-  }
+  addMetafields();
+  addProductOptions();
+  addTags();
+  addDateFields();
 
   return [
     "      <attributes>",
     ...attributes,
     "      </attributes>"
   ].join("\n");
+
+  // Adds SEO title and description attributes
+  function addSeoAttributes() {
+    if (product.seo?.title) {
+      const translatedSeoTitle = getTranslatedValue('seo_title', product.seo.title);
+      addAttribute("seo_title", translatedSeoTitle);
+    }
+    if (product.seo?.description) {
+      const translatedSeoDescription = getTranslatedValue('seo_description', product.seo.description);
+      addAttribute("seo_description", translatedSeoDescription);
+    }
+  }
+
+  // Adds attributes for a specific variant
+  function addVariantSpecificAttributes() {
+    const variantFields = ['sku', 'barcode', 'displayName', 'availableForSale', 'compareAtPrice'];
+    
+    variantFields.forEach(field => {
+      addVariantAttribute(variant, field);
+    });
+
+    if (variant.selectedOptions?.length > 0) {
+      variant.selectedOptions.forEach((option: any) => {
+        addAttribute("selected_options", `${option.name}: ${option.value}`);
+        addAttribute(option.name.toLowerCase(), option.value);
+      });
+    }
+  }
+
+  // Adds attributes from all variants when no specific variant is provided
+  function addAllVariantAttributes() {
+    if (product.variants?.edges?.length > 0) {
+      const variantFields = ['sku', 'barcode', 'availableForSale', 'compareAtPrice'];
+      
+      product.variants.edges.forEach((edge: any) => {
+        const v = edge.node;
+        variantFields.forEach(field => {
+          addVariantAttribute(v, field);
+        });
+      });
+    }
+  }
+
+  // Adds product metafields as attributes
+  function addMetafields() {
+    if (product.metafields?.edges?.length > 0) {
+      product.metafields.edges.forEach((edge: any) => {
+        const mf = edge.node;
+        const translatedValue = getTranslatedValue(`metafield_${mf.namespace}_${mf.key}`, mf.value);
+        addAttribute(`metafield_${mf.namespace}_${mf.key}`, translatedValue);
+      });
+    }
+  }
+
+  // Adds product options when no specific variant is provided
+  function addProductOptions() {
+    if (!variant && product.options?.length > 0) {
+      product.options.forEach((option: any) => {
+        if (option.values?.length > 0) {
+          option.values.forEach((value: string) => {
+            const translatedValue = getTranslatedValue(`option_${option.name}`, value);
+            addAttribute(`option_${option.name}`, translatedValue);
+          });
+        }
+      });
+    }
+  }
+
+  // Adds product tags as attributes
+  function addTags() {
+    if (product.tags?.length > 0) {
+      product.tags.forEach((tag: string) => {
+        const translatedTag = getTranslatedValue(`tag_${tag}`, tag);
+        addAttribute("tags", translatedTag);
+      });
+    }
+  }
+
+  // Adds date fields as attributes
+  function addDateFields() {
+    const dateFields = ['createdAt', 'updatedAt', 'publishedAt'];
+    dateFields.forEach(field => {
+      if (product[field]) {
+        addAttribute(field, product[field]);
+      }
+    });
+  }
 }

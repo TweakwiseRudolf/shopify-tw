@@ -3,7 +3,7 @@
 client_id = "03c5fda104387ecafd82d8f9a6fe77c7"
 name = "Tweakwise Export"
 handle = "tweakwise-export-app"
-application_url = "https://dinner-when-nearly-bus.trycloudflare.com"
+application_url = "https://invited-rugs-acm-peru.trycloudflare.com"
 embedded = true
 
 [build]
@@ -26,7 +26,7 @@ api_version = "2025-07"
 scopes = "read_products,read_markets, read_locales, read_markets_home"
 
 [auth]
-redirect_urls = ["https://dinner-when-nearly-bus.trycloudflare.com/auth/callback", "https://dinner-when-nearly-bus.trycloudflare.com/auth/shopify/callback", "https://dinner-when-nearly-bus.trycloudflare.com/api/auth/callback"]
+redirect_urls = ["https://invited-rugs-acm-peru.trycloudflare.com/auth/callback", "https://invited-rugs-acm-peru.trycloudflare.com/auth/shopify/callback", "https://invited-rugs-acm-peru.trycloudflare.com/api/auth/callback"]
 
 [pos]
 embedded = false
